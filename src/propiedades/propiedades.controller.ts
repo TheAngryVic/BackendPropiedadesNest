@@ -24,10 +24,11 @@ export class PropiedadesController {
     return this.propiedadesService.findOne(term);
   }
 
-  @Patch(':id')
-  update(@Param('id',ParseUUIDPipe) id: string, @Body() updatePropiedadeDto: UpdatePropiedadeDto) {
-    return this.propiedadesService.update(id, updatePropiedadeDto);
-  }
+   @Patch(':id')
+   update(@Param('id',ParseUUIDPipe) id: string, @Body() updatePropiedadeDto: UpdatePropiedadeDto) {
+     return this.propiedadesService.update(id, updatePropiedadeDto);
+   }
+  
 
   @Delete(':term')
   remove(@Param('term',ParseUUIDPipe) term: string) {

@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
+import { PropiedadImage } from "./propiedade-images.entity";
+import { Comuna } from '../../comuna/entities/comuna.entity';
 @Entity()
 export class Propiedade {
 
@@ -34,8 +36,16 @@ export class Propiedade {
     descripcion:string;
 
     //Ubicacion
-
+    @ManyToOne(()=> Comuna, (comuna)=>{comuna})
+    comuna:Comuna;
 
     //fotos
 
+    @OneToMany(
+        ()=> PropiedadImage,
+        (propiedadImage)=>propiedadImage.propiedad,
+        {cascade: true, eager: true}
+    )
+    images?:PropiedadImage[];
+    
 }

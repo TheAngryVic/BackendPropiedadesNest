@@ -45,5 +45,13 @@ export class CreatePropiedadeDto {
     @MinLength(1)
     descripcion:string;
 
+    @IsString()
+    @MinLength(1)
+    comuna:string;
+
+    @IsString({each:true})
+    @IsArray()
+    @IsOptional()
+    images?:string[];
 
 }
