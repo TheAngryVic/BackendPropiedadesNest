@@ -1,4 +1,4 @@
-import { IsString, MinLength, IsNumber, IsPositive, IsOptional, IsArray } from 'class-validator';
+import { IsString, MinLength, IsNumber, IsPositive, IsOptional, IsArray, isBoolean, IsBoolean } from 'class-validator';
 
 export class CreatePropiedadeDto {
 
@@ -14,16 +14,20 @@ export class CreatePropiedadeDto {
   
     @IsNumber()
     @IsPositive()
+    @IsOptional()
     precio:number;
 
     @IsNumber()
     @IsPositive()
-    @IsOptional()
-    uf?:number;
+    uf:number;
 
-    @IsString({each:true})
-    @IsArray()
-    tipo:string[];
+    @IsString()
+    mapUrl:string;
+
+    @IsNumber()
+    tipo:number;
+    @IsNumber()
+    tipoOperacion:number;
 
 
     @IsNumber()
@@ -44,6 +48,13 @@ export class CreatePropiedadeDto {
     @IsString()
     @MinLength(1)
     descripcion:string;
+
+    @IsBoolean()
+    estacionamiento:boolean;
+    @IsBoolean()
+    bodega:boolean;
+    @IsBoolean()
+    vigilancia:boolean;
 
     @IsString()
     @MinLength(1)

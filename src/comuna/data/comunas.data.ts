@@ -60,7 +60,9 @@ export const initialData:SeedData = {
                 {"nombre": "El Monte"},
                 {"nombre": "Isla de Maipo"},
                 {"nombre": "Padre Hurtado"},
-                {"nombre": "Peñaflor"}
+                {"nombre": "Pucón "},
+                {"nombre": "Peñaflor"},
+                {"nombre": "Puerto Varas"},
         ]
 
 }

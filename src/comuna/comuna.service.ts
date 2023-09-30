@@ -59,8 +59,11 @@ export class ComunaService {
 
 
 
-  findAll() {
-    return `This action returns all comuna`;
+  async findAll() {
+    const comunas = await this.ComunaRepository.find(
+      
+    )
+    return comunas
   }
 
   async findOne(id: string) {

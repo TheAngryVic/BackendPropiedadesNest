@@ -3,26 +3,98 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryBuilder, Repository } from 'typeorm';
 import { CreatePropiedadeDto } from './dto/create-propiedade.dto';
 import { UpdatePropiedadeDto } from './dto/update-propiedade.dto';
-import { Propiedade } from './entities/propiedade.entity';
+import { Propiedades } from './entities/propiedade.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { isUUID } from 'class-validator';
 import { ComunaService } from '../comuna/comuna.service';
 import { Comuna } from '../comuna/entities/comuna.entity';
 import { PropiedadImage } from './entities/propiedade-images.entity';
 
+import {PutObjectCommand, GetObjectCommand,S3Client} from '@aws-sdk/client-s3';
+
+// const FirebaseStorage = require('multer-firebase-storage')
+// const firebaseConfig = {
+//   apiKey: process.env.APIKEY,
+//   authDomain: process.env.AUTHDOMAIN,
+//   projectId: process.env.PROJECTID,
+//   storageBucket: "gs://nestjspropiedades.appspot.com",
+//   messagingSenderId: process.env.MESSAGINGSENDERID,
+//   appId: process.env.APPID
+// };
+// const app = initializeApp(firebaseConfig);
+// const storage = getStorage(app);
+
+
+
+
+
 @Injectable()
 export class PropiedadesService {
+
+  private readonly s3Client = new S3Client({
+    region:process.env.AWS_S3_REGION,
+    credentials:{
+      accessKeyId:process.env.AWS_ACCESS_KEY,
+      secretAccessKey:process.env.AWS_SECRET_ACCESS_KEY,
+    }
+  })
 
   private readonly logger = new Logger('PropiedadesService');
 
   constructor(
-    @InjectRepository(Propiedade)
-    private readonly propiedadesRepository: Repository<Propiedade>,
+    @InjectRepository(Propiedades)
+    private readonly propiedadesRepository: Repository<Propiedades>,
     @InjectRepository(PropiedadImage)
     private readonly imagesRepository: Repository<PropiedadImage>,
+  
     private readonly comunaService:ComunaService,
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
+    
   ) { }
+
+
+  async subirImagenes(id: string, file: Array<Express.Multer.File>){
+
+    const propiedad =  await this.findOne(id)
+
+    if (!propiedad) {
+      this.handleNotFound('No encontrado')
+    }
+
+    let arrayCreados:any[] = []
+    console.log(file);
+    for (const [index, img] of file.entries()) {
+      console.log(img);      
+      let key =  `${propiedad.id}/${propiedad.id}-${index}`
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: "nestjs-propiedades",
+          Key:key,
+          Body:img.buffer
+        })
+      )
+      let url = `https://nestjs-propiedades.s3.sa-east-1.amazonaws.com/${key}`
+
+       let imagen= await this.imagesRepository.save({
+        url,
+        propiedad:propiedad
+      })
+      arrayCreados.push(imagen)
+    }
+      return arrayCreados
+  }
+
+  async getAllImg(idparam){
+    let imagenes:PropiedadImage[] =
+    
+    await this.dataSource
+    .getRepository(PropiedadImage)
+    .createQueryBuilder("img")
+    .where("img.propiedadId = :id",{id:idparam})
+    .getMany()  
+
+    return imagenes
+  }
 
   async create(createPropiedadeDto: CreatePropiedadeDto) {
     try {
@@ -31,29 +103,18 @@ export class PropiedadesService {
 
      const oneCom = await this.comunaService.findOne(comuna)
 
-      // const propiedad = new Propiedade()
-      // propiedad.title = body.title;
-      // propiedad.direccion = body.direccion;
-      // propiedad.precio = body.precio;
-      // propiedad.uf = body.uf;
-      // propiedad.tipo = body.tipo;
-      // propiedad.metros = body.metros;
-      // propiedad.banios = body.banios;
-      // propiedad.dormitorios = body.dormitorios;
-      // propiedad.descripcion = body.descripcion;
-      // propiedad.comuna = oneCom
-
       const propiedad = await this.propiedadesRepository.create({
         ...body,
         comuna:oneCom,
-        images:images.map(image=> this.imagesRepository.create({url:image}))
+        // images:images.map(image=> this.imagesRepository.create({url:image}))
       })
 
 
       // await this.propiedadesRepository.create(propiedad)
       await this.propiedadesRepository.save(propiedad);
 
-      return {...propiedad, images};
+      return {...propiedad};
+      // return {...propiedad, images};
    
     
     
@@ -74,7 +135,7 @@ export class PropiedadesService {
 
   async findOne(term: string) {
 
-    let propiedad:Propiedade;
+    let propiedad:Propiedades;
 
     if (isUUID(term)) {
       propiedad = await this.propiedadesRepository.findOneBy({id:term})
@@ -91,7 +152,7 @@ export class PropiedadesService {
       this.handleNotFound(term)
     }
     else{
-
+      console.log(propiedad);
       return propiedad;
     }
 
@@ -120,13 +181,13 @@ export class PropiedadesService {
 
     try {
       
-      if (images) {
-        await queryRuner.manager.delete(PropiedadImage,{propiedad:{id}})
+      // if (images) {
+      //   await queryRuner.manager.delete(PropiedadImage,{propiedad:{id}})
         
-        propiedad.images= images.map(
-          image=>this.imagesRepository.create({url:image})
-        )
-      }
+      //   propiedad.images= images.map(
+      //     image=>this.imagesRepository.create({url:image})
+      //   )
+      // }
 
       await queryRuner.manager.save(propiedad);
       await queryRuner.commitTransaction();

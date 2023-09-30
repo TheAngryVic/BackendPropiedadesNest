@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany, OneToOne } from 'typeorm';
-import { Propiedade } from '../../propiedades/entities/propiedade.entity';
+import { Propiedades } from '../../propiedades/entities/propiedade.entity';
 
 @Entity({name:'Comuna'})
 export class Comuna {
