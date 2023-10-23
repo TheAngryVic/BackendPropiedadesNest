@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryBuilder, Repository } from 'typeorm';
 import { CreatePropiedadeDto } from './dto/create-propiedade.dto';
 import { UpdatePropiedadeDto } from './dto/update-propiedade.dto';
+import { FilterPropiedades } from './dto/filterPropiedades.dto';
 import { Propiedades } from './entities/propiedade.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { isUUID } from 'class-validator';
@@ -132,6 +133,41 @@ export class PropiedadesService {
 
     return popiedad;
   }
+
+
+  async filter(filterDto: FilterPropiedades){
+
+    console.log(filterDto);
+
+    const {comuna,precio,tipo,tipoOperacion,uf} = filterDto;
+
+    const query = this.propiedadesRepository.createQueryBuilder('propiedad')
+
+    query.leftJoinAndSelect('propiedad.images', 'images');
+    query.leftJoinAndSelect('propiedad.comuna', 'comuna');
+    if (comuna) {
+      query.andWhere('propiedad.comuna LIKE :comuna', { comuna: `%${comuna}%` });
+      
+    }
+    if (precio) {
+      query.andWhere('propiedad.precio LIKE :precio', { precio: `%${precio}%` });
+    }
+    if (tipo) {
+      query.andWhere('propiedad.tipo LIKE :tipo', { tipo: `%${tipo}%` });
+    }
+    if (tipoOperacion) {
+      query.andWhere('propiedad.tipoOperacion LIKE :tipoOperacion', { tipoOperacion: `%${tipoOperacion}%` });
+    }
+    if (uf) {
+      query.andWhere('propiedad.uf LIKE :uf', { uf: `%${uf}%` });
+    }
+   
+   let response = await query.getMany()
+    console.log(response);
+
+    return await response
+  }
+
 
   async findOne(term: string) {
 

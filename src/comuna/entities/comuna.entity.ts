@@ -5,7 +5,7 @@ import { Propiedades } from '../../propiedades/entities/propiedade.entity';
 export class Comuna {
     @PrimaryGeneratedColumn('uuid')
     id:string;
-    @Column('text',{unique:true})
+    @Column('varchar',{unique:true})
     nombre:string;
 
     // @OneToOne(

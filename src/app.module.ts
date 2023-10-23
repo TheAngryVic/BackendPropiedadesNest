@@ -7,21 +7,23 @@ import { PropiedadesModule } from './propiedades/propiedades.module';
 import { SeedModule } from './seed/seed.module';
 import { ComunaModule } from './comuna/comuna.module';
 import { FilesModule } from './files/files.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 
+console.log(process.env.USERNAME);
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      database: 'mysqlpropiedades',
+      host: process.env.HOST,
+      port: +process.env.PORT,
+      database: process.env.DATABASE,
       username: 'mega',
-      password: 'K6orJ4??-',
+      password: process.env.PASSWORD,
       autoLoadEntities: true,
-      // synchronize: true,
       synchronize: false,
       
 
@@ -43,7 +45,9 @@ import { FilesModule } from './files/files.module';
     PropiedadesModule,
     SeedModule,
     ComunaModule,
-    FilesModule
+    FilesModule,
+    AuthModule,
+    UsersModule
   ],
 })
 export class AppModule {}

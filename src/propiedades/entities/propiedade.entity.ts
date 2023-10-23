@@ -10,7 +10,7 @@ export class Propiedades {
     @Column('text')
     title:string;
 
-    @Column('text',{unique:true})
+    @Column('varchar',{unique:true})
     direccion:string;
   
     @Column('int')
